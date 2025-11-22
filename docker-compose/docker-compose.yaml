@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins-server
+
+    # Chạy quyền root để fix lỗi permission
+    user: root
+
+    # Dùng mạng Host để fix lỗi connect time out tới 100.x
+    network_mode: "host"
+
+    # KHI DÙNG HOST MODE: Phải bỏ phần ports đi vì nó không có tác dụng
+    # ports:
+    #   - "8383:8080"
+    #   - "50000:50000"
+
+    # THAY VÀO ĐÓ: Dùng biến môi trường để ép Jenkins chạy port 8383
+    environment:
+      - JENKINS_OPTS=--httpPort=8383 --httpsPort=-1
+
+    restart: unless-stopped
+
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_data:

@@ -2,44 +2,44 @@ pipeline {
     agent any
 
     environment {
-        SERVER_IP = '100.68.24.84'
+        // Cấu hình thông tin server đích
+        SERVER_IP = '100.86.59.89'
         SERVER_USER = 'dat'
-        PROJECT_FOLDER = '/opt/my-project'
+        PROJECT_FOLDER = '/home/dat/my-fastapi-app'
+
+        // ID các bí mật lưu trong Jenkins
+        SSH_CRED_ID = 'ssh-server-100'
+        ENV_FILE_ID = 'prod-env-file'
     }
 
     stages {
-        // Giai đoạn 0: Dọn dẹp sạch sẽ trước khi làm
         stage('Clean Workspace') {
             steps {
-                // Lệnh này xóa sạch thư mục làm việc để tránh lỗi quyền hoặc file rác
-                cleanWs()
+                cleanWs() // Dọn dẹp nhà cửa trước khi làm
             }
         }
 
-        // Giai đoạn 1: Code tự về (Do Jenkins tự làm sau khi clean)
-
-        // Giai đoạn 2: Chuẩn bị file Env
         stage('Prepare Secrets') {
             steps {
-                withCredentials([file(credentialsId: 'prod-env-file', variable: 'MY_ENV')]) {
-                    // Bây giờ quyền đã sạch, lệnh này sẽ chạy ngon
+                // Lấy file .env từ Jenkins Credentials
+                withCredentials([file(credentialsId: ENV_FILE_ID, variable: 'MY_ENV')]) {
                     sh 'cp $MY_ENV .env'
                 }
             }
         }
 
-        // Giai đoạn 3: Deploy sang Server 100.x
         stage('Deploy to Server') {
             steps {
-                sshagent(['ssh-server-company']) {
-                    // 1. Tạo thư mục
+                // Sử dụng SSH Key để kết nối
+                sshagent([SSH_CRED_ID]) {
+                    // 1. Tạo thư mục trên server (nếu chưa có)
                     sh "ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} 'mkdir -p ${PROJECT_FOLDER}'"
 
-                    // 2. Copy file
+                    // 2. Copy các file cần thiết sang server
                     sh "scp -o StrictHostKeyChecking=no docker-compose.yaml Dockerfile .env requirements.txt ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
                     sh "scp -o StrictHostKeyChecking=no -r * ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
 
-                    // 3. Chạy Docker Compose
+                    // 3. SSH vào server và chạy lệnh Docker Compose
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
                             cd ${PROJECT_FOLDER}
