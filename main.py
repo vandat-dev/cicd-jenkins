@@ -12,7 +12,7 @@ app = FastAPI()
 def root():
     host = os.getenv("HOST", "0.0.0.0")
     test = os.getenv("TEST", "default_test_value")
-    port = int(os.getenv("PORT", "8000"))
+    port = int(os.getenv("PORT", "8989"))
     return {"message": "Hello Jenkins onnnnnn " + test + host + str(port) + "!"}
 
 def main():
