@@ -39,17 +39,29 @@ pipeline {
                     // (Thêm -f để nếu file không tồn tại cũng không báo lỗi)
                     sh "ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} 'rm -f ${PROJECT_FOLDER}/.env'"
 
+                    // for coppy all files in workspace to server
                     // Copy file (Giờ chắc chắn sẽ tìm thấy vì đã checkout lại ở trên)
-                    sh "scp -o StrictHostKeyChecking=no docker-compose.yaml Dockerfile .env requirements.txt ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
+//                     sh "scp -o StrictHostKeyChecking=no docker-compose.yaml Dockerfile .env requirements.txt ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
 
                     // Copy toàn bộ code src
-                    sh "scp -o StrictHostKeyChecking=no -r * ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
+//                     sh "scp -o StrictHostKeyChecking=no -r * ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
+
+                    // 2. Copy 2 file sang: docker-compose.yaml và .env
+                    // (Lưu ý: KHÔNG COPY Dockerfile hay thư mục code nữa. Tại vì đã xây dựng image ngay trên server rồi)
+                    sh "scp -o StrictHostKeyChecking=no docker-compose.yaml .env ${SERVER_USER}@${SERVER_IP}:${PROJECT_FOLDER}/"
 
                     // Chạy
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
                             cd ${PROJECT_FOLDER}
-                            docker compose up -d --build --remove-orphans
+
+                            # Tải ảnh mới nhất từ Docker Hub về
+                            docker compose pull
+
+                            # Tái tạo container (Nó tự biết dùng ảnh mới)
+                            docker compose up -d --remove-orphans
+
+                            # Dọn dẹp ảnh cũ cho sạch ổ cứng
                             docker image prune -f
                         '
                     """

@@ -1,7 +1,8 @@
 version: '3.8'
 services:
   api:
-    build: .
+#    build: .
+    image: datbe/test-project:latest
     container_name: my-fastapi-container
     restart: always
     ports:
