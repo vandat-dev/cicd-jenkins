@@ -1,0 +1,29 @@
+# Kích hoạt khi có code mới vào nhánh main
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  # Thay tvdat3 bằng user docker hub của em
+  dockerRepository: 'datbe/test-project'
+  # Tên kết nối em vừa tạo ở Giai đoạn 2
+  dockerRegistryServiceConnection: 'DockerHubConnection'
+  tag: 'latest'
+
+# Dùng máy ảo Ubuntu của Microsoft (Miễn phí, Khỏe)
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# Bước 1: Build Docker Image và Đẩy lên Docker Hub
+- task: Docker@2
+  displayName: Build and Push
+  inputs:
+    command: buildAndPush
+    repository: $(dockerRepository)
+    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+    containerRegistry: $(dockerRegistryServiceConnection)
+    tags: |
+      $(tag)
