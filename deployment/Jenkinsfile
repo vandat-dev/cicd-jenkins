@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        SERVER_IP = '100.86.59.89'
-        SERVER_USER = 'dat'
-        PROJECT_FOLDER = '/home/dat/my-fastapi-app'
-        SSH_CRED_ID = 'ssh-server-100'
-        ENV_FILE_ID = 'prod-env-file'
+        SERVER_IP = "${SERVER_IP}"
+        SERVER_USER = "${SERVER_USER}"
+        PROJECT_FOLDER = "${PROJECT_FOLDER}"
+        SSH_CRED_ID = "${SSH_CRED_ID}"
+        ENV_FILE_ID = "${ENV_FILE_ID}"
     }
 
     stages {
