@@ -14,7 +14,7 @@ variables:
 
 # Dùng máy ảo Ubuntu của Microsoft (Miễn phí, Khỏe)
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'
 
 steps:
 # Bước 1: Build Docker Image và Đẩy lên Docker Hub
